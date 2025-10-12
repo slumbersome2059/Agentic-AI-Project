@@ -9,163 +9,125 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Leaflet.js for mapping -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <style>
-        /* Set a specific height for the map container */
-        #map { 
-            height: calc(100vh - 80px); /* Full viewport height minus the header's height */
-        }
-        html, body {
-            overflow: hidden; /* Prevent scrolling of the whole page */
-            font-family: 'Inter', sans-serif;
-        }
+        #map { height: calc(100vh - 80px); }
+        html, body { overflow: hidden; font-family: 'Inter', sans-serif; }
     </style>
 </head>
 <body class="bg-gray-800 text-white">
 
-    <!-- Header for controls -->
     <header class="h-[80px] bg-gray-900 shadow-lg flex items-center justify-center p-4 space-x-4">
         <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4 w-full max-w-xl">
-             <!-- Postcode Input -->
-            <input type="text" id="postcode" placeholder="Enter Postcode (e.g., CB2 1TN)"
-                   class="w-full md:w-1/2 bg-gray-700 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 transition duration-300 ease-in-out">
-
-            <!-- Distance Input -->
-            <input type="number" id="distance" placeholder="Distance in km"
-                   class="w-full md:w-1/4 bg-gray-700 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 transition duration-300 ease-in-out">
-
-            <!-- Generate Button -->
-            <button id="generateBtn"
-                    class="w-full md:w-1/4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-800 transition duration-300 ease-in-out shadow-md">
+            <input type="text" id="postcode" placeholder="Enter Postcode (e.g., CB2 1TN)" class="w-full md:w-1/2 bg-gray-700 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 transition">
+            <input type="number" id="distance" placeholder="Distance in km" class="w-full md:w-1/4 bg-gray-700 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 transition">
+            <button id="generateBtn" class="w-full md:w-1/4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-800 transition shadow-md">
                 Generate Route
             </button>
         </div>
     </header>
 
-    <!-- Map Container -->
-    <main>
-        <div id="map"></div>
-    </main>
+    <main><div id="map"></div></main>
 
-    <!-- Message Overlay -->
     <div id="messageOverlay" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-80 text-white p-6 rounded-lg shadow-xl z-[1000]">
         <p id="messageText" class="text-lg"></p>
     </div>
 
-    
-    <script>
-        // --- 1. Initialize the Map ---
-        // Set the initial view to Cambridge, UK
-        const map = L.map('map').setView([52.2053, 0.1218], 13);
-
-        // Add the OpenStreetMap tile layer
+    <!-- All JavaScript is now inside this single script tag -->
+    <script type="module">
+        // --- MAP AND UI LOGIC ---
+        const map = L.map('map').setView([52.2053, 0.1218], 13); // Default view of Cambridge
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        // --- 2. Element References ---
         const generateBtn = document.getElementById('generateBtn');
         const postcodeEl = document.getElementById('postcode');
         const distanceEl = document.getElementById('distance');
         const messageOverlay = document.getElementById('messageOverlay');
         const messageText = document.getElementById('messageText');
         
-        let routeLayer = null; // To hold the route line
+        let routeLayer = null;
 
-        // --- 3. Event Listener for the Button ---
-        generateBtn.addEventListener('click', () => {
+        // --- EVENT LISTENER TO CALL THE BACKEND ---
+        generateBtn.addEventListener('click', async () => {
             const postcode = postcodeEl.value;
             const distance = distanceEl.value;
 
-            // Simple validation
             if (!postcode || !distance) {
                 showMessage("Please enter both a postcode and a distance.", 3000);
                 return;
             }
 
-            console.log(`Generating route for ${distance}km from ${postcode}`);
-            showMessage(`Generating a ${distance}km route...`, 2000);
+            showMessage(`Generating a ${distance}km route...`, 5000);
+            generateBtn.disabled = true; // Disable button to prevent multiple clicks
             
-            // --- 4. API Call Placeholder ---
-            // In a real application, you would make a `fetch` call here
-            // to your Python backend API.
-            // fetch('https://your-backend-api.com/generate-route', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ postcode, distance })
-            // })
-            // .then(response => response.json())
-            // .then(data => {
-            //     drawRoute(data.route);
-            // })
-            // .catch(error => {
-            //     console.error('Error fetching route:', error);
-            //     showMessage('Could not generate route.', 3000);
-            // });
+            try {
+                // Use the Fetch API to send data to the Python backend
+                const response = await fetch('http://127.0.0.1:5002/api/generate-route', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        postcode: postcode,
+                        distance: distance
+                    }),
+                });
 
-            // --- 5. Mock Route Generation (for demonstration) ---
-            // This section simulates receiving a route from the backend.
-            // We'll remove any old route and draw a new sample one.
-            if (routeLayer) {
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Log the response from the backend to the browser console
+                console.log("--- Route Data Received from Backend ---");
+                console.log(data);
+                console.log("-----------------------------------------");
+                
+                if (data.route && data.route.length > 0) {
+                    showMessage("Route generated successfully!", 3000);
+                    var markerDC = L.marker([52.20, 0.1242]).addTo(map)
+                    var markerSR = L.marker(data.route[0]).addTo(map)
+                    
+                    
+                    drawRoute(data.route);
+                } else {
+                    throw new Error("Received empty or invalid route data from backend.");
+                }
+
+            } catch (error) {
+                console.error("Error fetching route from backend:", error);
+                showMessage(`Error: ${error.message}`, 5002);
+            } finally {
+                generateBtn.disabled = false; // Re-enable the button
+            }
+        });
+
+        function drawRoute(routeCoords) {
+            // Clear previous route from the map
+             if (routeLayer) {
                 map.removeLayer(routeLayer);
             }
-
-            // A sample route around central Cambridge
-            const sampleRoute = [
-                [52.2053, 0.1218],
-                [52.2076, 0.1227],
-                [52.2088, 0.1203],
-                [52.2091, 0.1172],
-                [52.2050, 0.1140],
-                [52.2023, 0.1178],
-                [52.2035, 0.1213],
-                [52.2053, 0.1218] 
-            ];
-            
-            drawRoute(sampleRoute);
-        });
-        
-        // --- 6. Helper Functions ---
-        
-        /**
-         * Draws a route on the map given an array of lat/lng coordinates.
-         * @param {Array<[number, number]>} routeCoords - An array of [latitude, longitude] pairs.
-         */
-        function drawRoute(routeCoords) {
-            // Create a polyline from the coordinates
-            const polyline = L.polyline(routeCoords, {
-                color: '#3b82f6', // A nice blue color
-                weight: 5,
-                opacity: 0.8
-            });
-
-            // Add the polyline to the map and fit the map view to the route
+            // Draw the new route
+            const polyline = L.polyline(routeCoords, { color: '#3b82f6', weight: 5, opacity: 0.8 });
             routeLayer = polyline.addTo(map);
-            map.fitBounds(polyline.getBounds().pad(0.1)); // pad adds some margin
+            // Adjust the map view to fit the entire route
+            map.fitBounds(polyline.getBounds().pad(0.1));
         }
         
-        /**
-         * Displays a message in an overlay for a specified duration.
-         * @param {string} text - The message to display.
-         * @param {number} duration - The time in milliseconds to show the message.
-         */
         function showMessage(text, duration) {
             messageText.textContent = text;
             messageOverlay.classList.remove('hidden');
-            
-            setTimeout(() => {
-                messageOverlay.classList.add('hidden');
-            }, duration);
+            setTimeout(() => { messageOverlay.classList.add('hidden'); }, duration);
         }
-
     </script>
 
 </body>
 </html>
+
