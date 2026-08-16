@@ -12,6 +12,7 @@ turn-by-turn directions for the route.
 # 1. Import necessary libraries
 import os
 import random
+import yaml
 from typing import List, Tuple, Optional, Dict
 
 import networkx as nx
@@ -164,8 +165,10 @@ def generate_route() -> Response:
                 The name of the street at the given coordinates.
             """
             return streetNames.get(tuple(latLongCoords), "Unknown Street")
-
-        genai.configure(api_key=${{secrets.GEMINI_API_KEY}})
+        with open('workflow.yaml', 'r') as file:
+            config = yaml.safe_load(file)
+        print(config['env']['API_KEY'])
+        genai.configure(api_key=config['env']['API_KEY'])
         model = genai.GenerativeModel(
             'gemini-1.5-flash',
             tools=[get_street_name],

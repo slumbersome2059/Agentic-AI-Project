@@ -121,7 +121,10 @@ def add(a:int, b:int) -> int:
 def subtract(a:int, b:int) -> int:
     "Adds two nums together"
     return a - b
-genai.configure(api_key=${{secrets.GEMINI_API_KEY}})
+with open('workflow.yaml', 'r') as file:
+    config = yaml.safe_load(file)
+print(config['env']['API_KEY'])
+genai.configure(api_key=config['env']['API_KEY'])
 model = genai.GenerativeModel(
     'gemini-2.5-flash-lite',
     tools = [geocode_postcode, gen_proj_Graph, get_distance_between_two_nodes, get_shortest_path, get_neighbours, get_distance_between_two_nodes, get_start_node]
