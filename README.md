@@ -4,7 +4,8 @@ This is a weekend project that I did to create a random running route generator 
 ### Demo
 
 
-![[Screenshot from 2026-08-16 15-36-05.png]]
+View the image named demoImg in the repository.
+
 Route Output:
 Starting route generation for BN6 8LP and 2.0km.
 Geocoded BN6 8LP to (50.922115, -0.1379842)
