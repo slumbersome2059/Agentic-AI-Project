@@ -4,7 +4,7 @@ This is a weekend project that I did to create a random running route generator 
 ### Demo
 
 
-![alt text](https://github.com/slumbersome2059/Agentic-AI-Project/main/demoImg.png?raw=true)
+![alt text](https://github.com/slumbersome2059/Agentic-AI-Project/blob/main/demoImg.png?raw=true)
 
 Route Output:
 Starting route generation for BN6 8LP and 2.0km.
