@@ -165,12 +165,14 @@ def generate_route() -> Response:
                 The name of the street at the given coordinates.
             """
             return streetNames.get(tuple(latLongCoords), "Unknown Street")
-        with open('workflow.yaml', 'r') as file:
-            config = yaml.safe_load(file)
-        print(config['env']['API_KEY'])
-        genai.configure(api_key=config['env']['API_KEY'])
+
+#GETTING API KEY -> API KEY stored on backend server and accessed through there
+#If GEMINI_API_KEY not found try checking if it exists in environment variables
+
+
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         model = genai.GenerativeModel(
-            'gemini-1.5-flash',
+            'gemini-2.5-flash-lite',
             tools=[get_street_name],
             system_instruction=(
                 "You should give your answer in one shot trying to be as helpful as possible. Don't ask further questions. "
