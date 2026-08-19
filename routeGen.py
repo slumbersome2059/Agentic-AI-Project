@@ -26,7 +26,20 @@ import google.generativeai as genai
 
 # 3. Initialize Flask App and enable CORS
 app: Flask = Flask(__name__)
+"""
+- this passes in the name of the file 
+- if file is in application folder, it gives name
+- if file is in python packages from application folder, then it also gives path along with name
+- This then allows flask to figure out the root path in your system(path from /) to that file
+- Then any files or directories stored in the same directory as the file can be accessed 
+- Eg, All static files(eg css files) will be stored in static/style.css and static is in same level of module that accesses it
+"""
+ 
 CORS(app)
+"""
+- this is cross origin resource sharing so allowing browser to load 
+resources from other origins(eg a domain, port) other than the current server
+"""
 
 # Configure osmnx to cache data
 #ox.config(use_cache=True, log_console=True)
@@ -45,8 +58,10 @@ def geocode_postcode(postcode: str, country: str = "UK") -> Optional[Tuple[float
         geocoding fails.
     """
     geolocator = Nominatim(user_agent="running_route_generator")
+    #This instantiates the geocoder, you give in application name
     try:
         location = geolocator.geocode(f"{postcode}, {country}")
+        #once you pass in a string with postcode, country, county, ... it will give you a location class with lots of info
         if location:
             return (location.latitude, location.longitude)
     except Exception as e:
@@ -55,6 +70,14 @@ def geocode_postcode(postcode: str, country: str = "UK") -> Optional[Tuple[float
 
 
 # 6. Define the API route for route generation
+"""
+This associates a URL with a function. So users can save the URL and immediately go to the URL
+ and the required function backend function will execute and when navigating between functions because
+ the URL is associated with functions that url will come up.
+
+Here the js makes a fetch call for this URL and this makes a POST request to
+URL which results in execution of this function.
+"""
 @app.route('/api/generate-route', methods=['POST'])
 def generate_route() -> Response:
     """
@@ -122,7 +145,7 @@ def generate_route() -> Response:
             path.append(next_node)
 
         mid_point_node: int = path[-1]
-
+        #====STOP POINT======
         # Step 4: Find the shortest path back to the start
         try:
             return_path: List[int] = nx.shortest_path(G_proj, source=mid_point_node, target=start_node, weight='length')
@@ -196,4 +219,5 @@ def generate_route() -> Response:
 
 # 7. Run the Flask app
 if __name__ == '__main__':
-    app.run(debug=True, port=5002)
+    print(__name__)
+    #app.run(debug=True, port=5002)
